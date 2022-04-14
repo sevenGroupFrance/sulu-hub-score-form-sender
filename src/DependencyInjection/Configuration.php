@@ -10,7 +10,7 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('sulu_hub_score_send_form');
+        $treeBuilder = new TreeBuilder('sulu_hub_score_form_sender');
 
         $treeBuilder->getRootNode()
             ->children()
