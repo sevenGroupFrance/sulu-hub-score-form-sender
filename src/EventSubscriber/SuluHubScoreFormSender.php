@@ -14,7 +14,7 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
     private $pwd;
     private $client;
 
-    public function __construct($id, $pwd, HttpClientInterface $client) {
+    public function __construct($id = '', $pwd = '', HttpClientInterface $client) {
         $this->id = $id;
         $this->pwd = $pwd;
         $this->client = $client;
