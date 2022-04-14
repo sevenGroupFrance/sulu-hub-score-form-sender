@@ -39,8 +39,8 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
         if ($form) {
             $apiCall = new HubScoreApi($this->id, $this->pwd, $this->client);
             $response = $apiCall->getResponse();
-            $login_token = $response->getLoginToken();
-            if ($response->statusCode() === 200 && $login_token) {
+            $login_token = $apiCall->getLoginToken();
+            if ($response->getStatusCode() === 200 && $login_token) {
                 $apiCall->sendForm($this->client, $form);
             }
             /* $after_connect_statusCode = $after_connect_response->getStatusCode(); */
