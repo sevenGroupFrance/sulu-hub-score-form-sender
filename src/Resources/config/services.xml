@@ -7,8 +7,8 @@
         <defaults autowire="true" autoconfigure="true"/>
 
         <service id="seven_group_france.sulu_hub_score_form_sender.event_subscriber.sulu_hub_score_form_sender" class="SevenGroupFrance\SuluHubScoreFormSenderBundle\EventSubscriber\SuluHubScoreFormSender" autowire="true">
-            <argument>%hub_score_api.login.id%</argument>
-            <argument>%hub_score_api.login.pwd%</argument>
+            <argument>%sulu_hub_score_form_sender.login.id%</argument>
+            <argument>%sulu_hub_score_form_sender.login.pwd%</argument>
             <tag name="kernel.event_subscriber" />
         </service>
     </services>
