@@ -16,7 +16,7 @@ class SuluHubScoreFormSenderExtension extends Extension
 
         $container->setParameter('sulu_hub_score_form_sender.login.id', $config['login']['id']);
         $container->setParameter('sulu_hub_score_form_sender.login.pwd', $config['login']['pwd']);
-
+        $container->setParameter('sulu_hub_score_form_sender.forms', $config['forms']);
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
     }
