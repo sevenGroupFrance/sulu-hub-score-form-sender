@@ -5,8 +5,9 @@ namespace SevenGroupFrance\SuluHubScoreFormSenderBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 
-class Configuration implements ConfigurationInterface
+class Configuration extends NodeBuilder implements ConfigurationInterface 
 {
     public function getConfigTreeBuilder()
     {
@@ -21,6 +22,22 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->scalarNode('pwd')
                             ->defaultValue('')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('forms')
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                        ->children()
+                            ->arrayNode('config')
+                                ->children()
+                                    ->scalarNode('campaign_id')->end()
+                                    ->scalarNode('database_id')->end()
+                                ->end()
+                            ->end()
+                            ->arrayNode('fields')
+                                ->prototype('scalar')->end()
+                            ->end()
                         ->end()
                     ->end()
                 ->end()
