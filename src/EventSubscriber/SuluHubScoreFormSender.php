@@ -12,11 +12,13 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
 {
     private $id;
     private $pwd;
+    private $forms;
     private $client;
-
-    public function __construct($id = '', $pwd = '', HttpClientInterface $client) {
+    public function __construct($id = '', $pwd = '', $forms = [], HttpClientInterface $client)
+    {
         $this->id = $id;
         $this->pwd = $pwd;
+        $this->forms = $forms;
         $this->client = $client;
     }
 
@@ -37,7 +39,7 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
 
         $form = $dynamic->getForm()->serializeForLocale($dynamic->getLocale(), $dynamic);
         if ($form) {
-            $apiCall = new HubScoreApi($this->id, $this->pwd, $this->client);
+            $apiCall = new HubScoreApi($this->id, $this->pwd, $this->forms, $this->client);
             $response = $apiCall->getResponse();
             $login_token = $apiCall->getLoginToken();
             if ($response->getStatusCode() === 200 && $login_token) {
