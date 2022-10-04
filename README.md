@@ -26,3 +26,6 @@ Be careful to always put `email` as the very first field, and put the other fiel
 
 ### 1.1.0
 You can now configure the fields you need, your campaign and database ID, for multiple forms.
+
+### 1.1.1
+You can now configure flashbag message (error and success only)
