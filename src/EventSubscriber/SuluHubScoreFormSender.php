@@ -4,9 +4,10 @@ namespace SevenGroupFrance\SuluHubScoreFormSenderBundle\EventSubscriber;
 
 use SevenGroupFrance\HubScoreApiBundle\EventSubscriber\HubScoreApi;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Sulu\Bundle\FormBundle\Entity\Dynamic;
 use Sulu\Bundle\FormBundle\Event\FormSavePostEvent;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SuluHubScoreFormSender implements EventSubscriberInterface
 {
@@ -14,12 +15,15 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
     private $pwd;
     private $forms;
     private $client;
-    public function __construct($id = '', $pwd = '', $forms = [], HttpClientInterface $client)
+    private $flashBag;
+
+    public function __construct($id = '', $pwd = '', $forms = [], HttpClientInterface $client, FlashBagInterface $flashBag)
     {
         $this->id = $id;
         $this->pwd = $pwd;
         $this->forms = $forms;
         $this->client = $client;
+        $this->flashBag = $flashBag;
     }
 
     public static function getSubscribedEvents(): array
@@ -29,7 +33,7 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
         ];
     }
 
-    public function hubAPI(FormSavePostEvent $event): void
+    public function hubAPI(FormSavePostEvent $event)
     {
         $dynamic = $event->getData();
 
@@ -41,11 +45,19 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
         if ($form) {
             $apiCall = new HubScoreApi($this->id, $this->pwd, $this->forms, $this->client);
             $response = $apiCall->getResponse();
-            $login_token = $apiCall->getLoginToken();
-            if ($response->getStatusCode() === 200 && $login_token) {
-                $apiCall->sendForm($this->client, $form);
+            if ($response->getStatusCode() === 200) {
+                $login_token = $apiCall->getLoginToken();
+                if ($login_token) {
+                    $finalResponse = $apiCall->sendForm($this->client, $form);
+                    $rep = $finalResponse['reponse'];
+                    $messages = $finalResponse['messages'];
+                    if ($rep->getStatusCode() >= 400) {
+                        $this->flashBag->add('error', isset($messages['error']) ? $messages['error'] : "");
+                        return;
+                    }
+                    $this->flashBag->add('success', isset($messages['success']) ? $messages['success'] : "");
+                }
             }
-            /* $after_connect_statusCode = $after_connect_response->getStatusCode(); */
         }
     }
 }
