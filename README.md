@@ -8,7 +8,16 @@ sulu_hub_score_form_sender:
         id: your_id
         pwd: your password
     forms:
-        "Name of your form title": { config: { campaign_id: yourId, database_id: yourId }, fields: [your, fields, here] }
+        "Name of your form title": { 
+            config: { campaign_id: yourId, database_id: yourId }, 
+            fields: [your, fields, here],
+            messages:
+                    {
+                        error: "Your error message",
+                        success: "Your success message",
+                    },
+        }
+
 ```
 Be careful to always put `email` as the very first field, and put the other fields THE SAME ORDER AS THEY ARE CONFIGURED IN YOUR SULU FORM.\
 3 - download this bundle `composer require sevengroupfrance/sulu-hub-score-form-sender-bundle`\
