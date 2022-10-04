@@ -1,6 +1,5 @@
 <?php
 
-// src/Acme/SocialBundle/DependencyInjection/Configuration.php
 namespace SevenGroupFrance\SuluHubScoreFormSenderBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -37,6 +36,12 @@ class Configuration extends NodeBuilder implements ConfigurationInterface
                             ->end()
                             ->arrayNode('fields')
                                 ->prototype('scalar')->end()
+                            ->end()
+                            ->arrayNode('messages')
+                                ->children()
+                                    ->scalarNode('error')->end()
+                                    ->scalarNode('success')->end()
+                                ->end()
                             ->end()
                         ->end()
                     ->end()
