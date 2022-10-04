@@ -11,14 +11,39 @@ use Sulu\Bundle\FormBundle\Event\FormSavePostEvent;
 
 class SuluHubScoreFormSender implements EventSubscriberInterface
 {
+
+    /**
+     * @var string $id
+     */
     private $id;
+
+    /**
+     * @var string $pwd
+     */
     private $pwd;
+
+    /**
+     * @var array $forms
+     */
     private $forms;
+
+    /**
+     * @var HttpClientInterface $client
+     */
     private $client;
+
+    /**
+     * @var FlashBagInterface $flashBag
+     */
     private $flashBag;
 
-    public function __construct($id = '', $pwd = '', $forms = [], HttpClientInterface $client, FlashBagInterface $flashBag)
-    {
+    public function __construct(
+        string $id = '',
+        string $pwd = '',
+        array $forms = [],
+        HttpClientInterface $client,
+        FlashBagInterface $flashBag
+    ) {
         $this->id = $id;
         $this->pwd = $pwd;
         $this->forms = $forms;
@@ -26,6 +51,12 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
         $this->flashBag = $flashBag;
     }
 
+
+    /**
+     * getSubscribedEvents function.
+     * 
+     * @return array
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -33,7 +64,17 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
         ];
     }
 
-    public function hubAPI(FormSavePostEvent $event)
+    /**
+     * hubAPI function.
+     * Checks if the data from form event is of Dynamic type, then gets the form datas out of it.
+     * Once done it hydrates the HubScoreApi object with the yaml configuration and the HttpClientInterface client.
+     * Then it gets the response out of it and do the logic if it gets connected to the API.
+     * If everything is good, it sends the form, then it gets another status code.
+     * 
+     * @param object FormSavePostEvent
+     * @return void
+     */
+    public function hubAPI(FormSavePostEvent $event): void
     {
         $dynamic = $event->getData();
 
