@@ -7,10 +7,14 @@
         <defaults autowire="true" autoconfigure="true"/>
 
         <service id="seven_group_france.sulu_hub_score_form_sender.event_subscriber.sulu_hub_score_form_sender" class="SevenGroupFrance\SuluHubScoreFormSenderBundle\EventSubscriber\SuluHubScoreFormSender" autowire="true">
-            <argument>%sulu_hub_score_form_sender.login.id%</argument>
-            <argument>%sulu_hub_score_form_sender.login.pwd%</argument>
-            <argument>%sulu_hub_score_form_sender.forms%</argument>
-            <tag name="kernel.event_subscriber" />
+            <argument>%sulu_hub_score_form_sender.base_configuration.id%</argument>
+            <argument>%sulu_hub_score_form_sender.base_configuration.pwd%</argument>
+            <argument>%sulu_hub_score_form_sender.base_configuration.base_url%</argument>
+            <argument>%sulu_hub_score_form_sender.login_url%</argument>
+            <argument>%sulu_hub_score_form_sender.payload_configuration.campagn_id%</argument>
+            <argument>%sulu_hub_score_form_sender.payload_configuration.database_id%</argument>
+            <argument>%sulu_hub_score_form_sender.send_mail_url%</argument>
+            <tag name="swiftmailer.default.plugin" />
         </service>
     </services>
 </container>
