@@ -2,14 +2,12 @@
 
 namespace SevenGroupFrance\SuluHubScoreFormSenderBundle\EventSubscriber;
 
-use SevenGroupFrance\HubScoreApiBundle\EventSubscriber\HubScoreApi;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Swift_Events_SendEvent;
+use Swift_Events_SendListener;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Sulu\Bundle\FormBundle\Entity\Dynamic;
-use Sulu\Bundle\FormBundle\Event\FormSavePostEvent;
 
-class SuluHubScoreFormSender implements EventSubscriberInterface
+class SuluHubScoreFormSender implements Swift_Events_SendListener
 {
 
     /**
@@ -23,9 +21,34 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
     private $pwd;
 
     /**
-     * @var array $forms
+     * @var string $base_url
      */
-    private $forms;
+    private $base_url;
+
+    /**
+     * @var string $login_url
+     */
+    private $login_url;
+
+    /**
+     * @var int $campagn_id
+     */
+    private $campagn_id;
+
+    /**
+     * @var int $database_id
+     */
+    private $database_id;
+
+    /**
+     * @var string $token
+     */
+    private $token;
+
+    /**
+     * @var string $send_mail_url
+     */
+    private $send_mail_url;
 
     /**
      * @var HttpClientInterface $client
@@ -40,65 +63,97 @@ class SuluHubScoreFormSender implements EventSubscriberInterface
     public function __construct(
         string $id = '',
         string $pwd = '',
-        array $forms = [],
+        string $base_url = '',
+        string $login_url = '',
+        int $campagn_id = 0,
+        int $database_id = 0,
+        string $send_mail_url = '',
         HttpClientInterface $client,
         FlashBagInterface $flashBag
     ) {
         $this->id = $id;
         $this->pwd = $pwd;
-        $this->forms = $forms;
+        $this->base_url = $base_url;
+        $this->login_url = $login_url;
+        $this->campagn_id = $campagn_id;
+        $this->database_id = $database_id;
+        $this->send_mail_url = $send_mail_url;
         $this->client = $client;
         $this->flashBag = $flashBag;
     }
 
-
-    /**
-     * getSubscribedEvents function.
-     * 
-     * @return array
-     */
-    public static function getSubscribedEvents(): array
+    private function login($id, $pwd, $base_url, $login_url)
     {
-        return [
-            FormSavePostEvent::NAME => "hubAPI"
-        ];
+        $response = $this->client->request(
+            'POST',
+            'https://' . $base_url . $login_url,
+            [
+                'json' => [
+                    'Username' => $id,
+                    'Password' => $pwd
+                ]
+            ]
+        );
+
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode >= 200 & $statusCode < 300) {
+            $this->token = $response->toArray()['token'];
+        } else {
+            $this->token = null;
+        }
+
+        return $response;
     }
 
-    /**
-     * hubAPI function.
-     * Checks if the data from form event is of Dynamic type, then gets the form datas out of it.
-     * Once done it hydrates the HubScoreApi object with the yaml configuration and the HttpClientInterface client.
-     * Then it gets the response out of it and do the logic if it gets connected to the API.
-     * If everything is good, it sends the form, then it gets another status code.
-     * 
-     * @param object FormSavePostEvent
-     * @return void
-     */
-    public function hubAPI(FormSavePostEvent $event): void
+    public function beforeSendPerformed(Swift_Events_SendEvent $event)
     {
-        $dynamic = $event->getData();
-
-        if (!$dynamic instanceof Dynamic) {
-            return;
-        }
-
-        $form = $dynamic->getForm()->serializeForLocale($dynamic->getLocale(), $dynamic);
-        if ($form) {
-            $apiCall = new HubScoreApi($this->id, $this->pwd, $this->forms, $this->client);
-            $response = $apiCall->getResponse();
-            if ($response->getStatusCode() === 200) {
-                $login_token = $apiCall->getLoginToken();
-                if ($login_token) {
-                    $finalResponse = $apiCall->sendForm($this->client, $form);
-                    $rep = $finalResponse['reponse'];
-                    $messages = $finalResponse['messages'];
-                    if ($rep->getStatusCode() >= 400) {
-                        $this->flashBag->add('error', isset($messages['error']) ? $messages['error'] : "");
-                        return;
-                    }
-                    $this->flashBag->add('success', isset($messages['success']) ? $messages['success'] : "");
-                }
+        // checks if the token is hydrated
+        // if the token is hydrated, we skip this part, which is required only one time
+        if (empty($this->token)) {
+            // if it's the first time, the token is hydrated by the login function
+            $this->login($this->id, $this->pwd, $this->base_url, $this->login_url);
+            // if the token is invalid, then we redirect the user to the url they were on and we show an error flash message
+            if (!isset($this->token) || empty($this->token)) {
+                $this->flashBag->add('error', "Une erreur est survenue, merci de réessayer ou de contacter un administrateur si l'erreur persiste.");
+                header("Location: ". $this->getUrl(), false);
+                exit;
             }
         }
+    }
+
+    public function sendPerformed(Swift_Events_SendEvent $event)
+    {
+        $response = $this->client->request(
+            'POST',
+            'https://' . $this->base_url . $this->send_mail_url,
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Content-Type' => 'application/json'
+                ],
+                "json" =>
+                [
+                    "userMail" => $this->getMessageTo($event->getMessage()->getTo()),
+                    "campagnId" => $this->campagn_id,
+                    "databaseId" => $this->database_id,
+                    "html" => $event->getMessage()->getBody()
+                ]
+            ]
+        );
+        dump($response->toArray(), $response->getStatusCode());
+        return $response;
+    }
+
+    public function getUrl()
+    {
+        return (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    }
+
+    private function getMessageTo($toArray) {
+        foreach($toArray as $key => $value) {
+            break;
+        }
+        return $key;
     }
 }
