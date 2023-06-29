@@ -7,16 +7,15 @@ sulu_hub_score_form_sender:
     base_configuration:
         id: '%env(HUBSCORE_USERNAME)%'
         pwd: '%env(HUBSCORE_PASSWORD)%'
-        base_url: your.base-url.com
+        base_url: api.hub-score.com
 
-    login_url: /yourloginurl
+    login_url: /login_check
 
     payload_configuration:
         campagn_id: '%env(HUB_SCORE_SEND_MAIL_CAMPAGN_ID)%'
         database_id: '%env(HUB_SCORE_SEND_MAIL_DATABASE_ID)%'
 
-    send_mail_url: /yoursendmailurl
-
+    send_mail_url: /v1/sends/mails
 ```
 3 - download this bundle `composer require sevengroupfrance/sulu-hub-score-form-sender-bundle`\
 
