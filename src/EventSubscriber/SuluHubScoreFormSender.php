@@ -107,8 +107,6 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
         } else {
             $this->token = null;
         }
-
-        return $response;
     }
 
     public function beforeSendPerformed(Swift_Events_SendEvent $event)
@@ -135,7 +133,7 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
             // insert id in array and execute send mail api request
             $this->idArray[] = $messageId;
 
-            $response = $this->client->request(
+            $this->client->request(
                 'POST',
                 'https://' . $this->base_url . $this->send_mail_url,
                 [
@@ -152,11 +150,8 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
                     ]
                 ]
             );
-
-            return $response;
         }
         // else, do nothing
-        return;
     }
 
     public function getUrl()
