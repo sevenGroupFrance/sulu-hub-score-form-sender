@@ -51,6 +51,11 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
     private $send_mail_url;
 
     /**
+     * @var array $idArray
+     */
+    private $idArray = [];
+
+    /**
      * @var HttpClientInterface $client
      */
     private $client;
@@ -116,7 +121,7 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
             // if the token is invalid, then we redirect the user to the url they were on and we show an error flash message
             if (!isset($this->token) || empty($this->token)) {
                 $this->flashBag->add('error', "Une erreur est survenue, merci de réessayer ou de contacter un administrateur si l'erreur persiste.");
-                header("Location: ". $this->getUrl(), false);
+                header("Location: " . $this->getUrl(), false);
                 exit;
             }
         }
@@ -124,25 +129,34 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
     public function sendPerformed(Swift_Events_SendEvent $event)
     {
-        $response = $this->client->request(
-            'POST',
-            'https://' . $this->base_url . $this->send_mail_url,
-            [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->token,
-                    'Content-Type' => 'application/json'
-                ],
-                "json" =>
+        $messageId = $event->getMessage()->getId();
+        // if the messageId is not in the idArray
+        if (!in_array($messageId, $this->idArray, true)) {
+            // insert id in array and execute send mail api request
+            $this->idArray[] = $messageId;
+
+            $response = $this->client->request(
+                'POST',
+                'https://' . $this->base_url . $this->send_mail_url,
                 [
-                    "userMail" => $this->getMessageTo($event->getMessage()->getTo()),
-                    "campagnId" => $this->campagn_id,
-                    "databaseId" => $this->database_id,
-                    "html" => $event->getMessage()->getBody()
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json'
+                    ],
+                    "json" =>
+                    [
+                        "userMail" => $this->getMessageTo($event->getMessage()->getTo()),
+                        "campagnId" => $this->campagn_id,
+                        "databaseId" => $this->database_id,
+                        "html" => $event->getMessage()->getBody()
+                    ]
                 ]
-            ]
-        );
-        dump($response->toArray(), $response->getStatusCode());
-        return $response;
+            );
+
+            return $response;
+        }
+        // else, do nothing
+        return;
     }
 
     public function getUrl()
@@ -150,8 +164,9 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
         return (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     }
 
-    private function getMessageTo($toArray) {
-        foreach($toArray as $key => $value) {
+    private function getMessageTo($toArray)
+    {
+        foreach ($toArray as $key => $value) {
             break;
         }
         return $key;
