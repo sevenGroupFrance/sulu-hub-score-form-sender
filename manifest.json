@@ -1,8 +1,35 @@
 {
-  "bundles": {
-    "SevenGroupFrance\\SuluHubScoreFormSenderBundle\\SuluHubScoreFormSenderBundle": ["all"]
-  },
-  "copy-from-recipe": {
-    "config/": "%CONFIG_DIR%/"
-  }
+    "manifests": {
+        "acme/private-bundle": {
+            "manifest": {
+                "bundles": {
+                  "SevenGroupFrance\\SuluHubScoreFormSenderBundle\\SuluHubScoreFormSenderBundle": ["all"]
+                },
+                "copy-from-recipe": {
+                  "config/": "%CONFIG_DIR%/"
+                }
+            },
+            "files": {
+                "config/packages/sulu_hub_score_form_sender.yaml": {
+                    "contents": [
+                        "sulu_hub_score_form_sender:",
+                        "    base_configuration:",
+                        "        id: '%env(HUBSCORE_USERNAME)%'",
+                        "        pwd: '%env(HUBSCORE_PASSWORD)%'",
+                        "        base_url: api.hub-score.com",
+                        "",
+                        "    login_url: /login_check",
+                        "",
+                        "    payload_configuration:",
+                        "        campagn_id: '%env(HUB_SCORE_SEND_MAIL_CAMPAGN_ID)%'",
+                        "        database_id: '%env(HUB_SCORE_SEND_MAIL_DATABASE_ID)%'",
+                        "",
+                        "    send_mail_url: /v1/sends/mails"
+                    ],
+                    "executable": false
+                }
+            },
+            "ref": "426980778e2b2d736a958ec43733d82836621a05"
+        }
+    }
 }
