@@ -26,7 +26,7 @@
                         "",
                         "    send_mail_url: /v1/sends/mails"
                     ],
-                    "executable": false
+                    "executable": true
                 }
             },
             "ref": "426980778e2b2d736a958ec43733d82836621a05"
