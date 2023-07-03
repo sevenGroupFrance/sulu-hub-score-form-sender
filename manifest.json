@@ -1,6 +1,6 @@
 {
     "manifests": {
-        "acme/private-bundle": {
+        "sevengroupfrance/sulu-hub-score-form-sender-bundle": {
             "manifest": {
                 "bundles": {
                       "SevenGroupFrance\\SuluHubScoreFormSenderBundle\\SuluHubScoreFormSenderBundle": ["all"]
