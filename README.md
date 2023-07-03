@@ -7,13 +7,13 @@ sulu_hub_score_form_sender:
     base_configuration:
         id: '%env(HUBSCORE_USERNAME)%'
         pwd: '%env(HUBSCORE_PASSWORD)%'
-        base_url: api.hub-score.com
+        base_url: '%env(HUBSCORE_URL)%'
 
     login_url: /login_check
 
     payload_configuration:
-        campagn_id: '%env(HUB_SCORE_SEND_MAIL_CAMPAGN_ID)%'
-        database_id: '%env(HUB_SCORE_SEND_MAIL_DATABASE_ID)%'
+        campagn_id: '%env(HUBSCORE_CAMPAGN)%'
+        database_id: '%env(HUBSCORE_DB)%'
 
     send_mail_url: /v1/sends/mails
 ```
