@@ -22,5 +22,13 @@
             "type": "vcs",
             "url": "https://github.com/sevenGroupFrance/sulu-hub-score-form-sender-bundle/"
         }
-    ]
+    ],
+    "extra": {
+        "symfony": {
+            "endpoint": [
+                "https://api.github.com/repos/sevenGroupFrance/sulu-hub-score-form-sender-bundle/contents/index.json",
+                "flex://defaults"
+            ]
+        }
+    }
 }
