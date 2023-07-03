@@ -17,7 +17,7 @@ sulu_hub_score_form_sender:
 
     send_mail_url: /v1/sends/mails
 ```
-3 - download this bundle `composer require sevengroupfrance/sulu-hub-score-form-sender-bundle`\
+3 - download this bundle `composer require sevengroupfrance/sulu-hub-score-form-sender-bundle`
 
 This bundle is for Sulu 2.4 and prior, as it uses swiftmailer to make this work.
 If you're using Sulu 2.5, prefer using [Symfony mailer](https://symfony.com/doc/current/mailer.html)
