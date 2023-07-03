@@ -91,7 +91,7 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
     {
         $response = $this->client->request(
             'POST',
-            'https://' . $base_url . $login_url,
+            $base_url . $login_url,
             [
                 'json' => [
                     'Username' => $id,
@@ -135,7 +135,7 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
             $this->client->request(
                 'POST',
-                'https://' . $this->base_url . $this->send_mail_url,
+                $this->base_url . $this->send_mail_url,
                 [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $this->token,
