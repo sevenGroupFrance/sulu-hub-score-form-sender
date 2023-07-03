@@ -1,0 +1,14 @@
+{
+    "recipes": {
+        "sevengroupfrance/sulu-hub-score-form-sender-bundle": [
+            "1.2.1"
+        ]
+    },
+    "branch": "main",
+    "is_contrib": true,
+    "_links": {
+        "repository": "github.com/sevenGroupFrance/sulu-hub-score-form-sender-bundle",
+        "origin_template": "{package}:{version}@github.com/sevenGroupFrance/sulu-hub-score-form-sender-bundle:main",
+        "recipe_template": "https://api.github.com/repos/sevenGroupFrance/sulu-hub-score-form-sender-bundle/contents/{package_dotted}.{version}.json"
+    }
+}
