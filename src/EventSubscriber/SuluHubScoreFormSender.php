@@ -111,6 +111,9 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
     public function beforeSendPerformed(Swift_Events_SendEvent $event)
     {
+        // checks if the event is an agenda event and if the payment is online
+        $this->isEnLigneAndAgenda($event);
+
         // checks if the token is hydrated
         // if the token is hydrated, we skip this part, which is required only one time
         if (empty($this->token)) {
@@ -127,6 +130,9 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
     public function sendPerformed(Swift_Events_SendEvent $event)
     {
+        // checks if the event is an agenda event and if the payment is online
+        $this->isEnLigneAndAgenda($event);
+
         $messageId = $event->getMessage()->getId();
         // if the messageId is not in the idArray
         if (!in_array($messageId, $this->idArray, true)) {
@@ -165,5 +171,16 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
             break;
         }
         return $key;
+    }
+
+    private function isEnLigneAndAgenda($event)
+    {
+        // I'm looking for the string "En ligne" in the body of the message and if the url contains "/agenda/"
+        // If true, then I do nothing
+        $isEnLigne = str_contains($event->getMessage()->getBody(), 'En ligne');
+        $isAgendaEvent = str_contains($_SERVER['REQUEST_URI'], '/agenda/');
+        if ($isAgendaEvent && $isEnLigne) {
+            return;
+        }
     }
 }
