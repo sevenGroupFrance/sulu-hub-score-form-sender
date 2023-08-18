@@ -111,8 +111,19 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
     public function beforeSendPerformed(Swift_Events_SendEvent $event)
     {
-        // checks if the event is an agenda event and if the payment is online
-        $this->isEnLigneAndAgenda($event);
+
+        // this code is doubled, I tried to make a function out of it but it didn't work
+        $body = $this->getMessageBody($event->getMessage()->getBody());
+        $isEnLigne = str_contains($body, 'En ligne');
+        $isAgendaEvent = str_contains($_SERVER['REQUEST_URI'], '/agenda/');
+        // if the event is an agenda event and the event is online, we skip this part
+        if ($isAgendaEvent && $isEnLigne) {
+            return;
+        }
+        // if the body is empty, we skip this part
+        if (empty($body)) {
+            return;
+        }
 
         // checks if the token is hydrated
         // if the token is hydrated, we skip this part, which is required only one time
@@ -130,34 +141,42 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
 
     public function sendPerformed(Swift_Events_SendEvent $event)
     {
-        // checks if the event is an agenda event and if the payment is online
-        $this->isEnLigneAndAgenda($event);
+        $body = $this->getMessageBody($event->getMessage()->getBody());
+        $isEnLigne = str_contains($body, 'En ligne');
+        $isAgendaEvent = str_contains($_SERVER['REQUEST_URI'], '/agenda/');
+        // if the event is an agenda event and the event is online, we skip this part
+        if ($isAgendaEvent && $isEnLigne) {
+            return;
+        }
 
         $messageId = $event->getMessage()->getId();
         // if the messageId is not in the idArray
-        if (!in_array($messageId, $this->idArray, true)) {
-            // insert id in array and execute send mail api request
-            $this->idArray[] = $messageId;
+        if (!empty($this->token)) {
 
-            $this->client->request(
-                'POST',
-                $this->base_url . $this->send_mail_url,
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $this->token,
-                        'Content-Type' => 'application/json'
-                    ],
-                    "json" =>
+            if (!in_array($messageId, $this->idArray, true)) {
+                // insert id in array and execute send mail api request
+                $this->idArray[] = $messageId;
+
+                $this->client->request(
+                    'POST',
+                    $this->base_url . $this->send_mail_url,
                     [
-                        "userMail" => $this->getMessageTo($event->getMessage()->getTo()),
-                        "campagnId" => $this->campagn_id,
-                        "databaseId" => $this->database_id,
-                        "html" => $event->getMessage()->getBody()
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $this->token,
+                            'Content-Type' => 'application/json'
+                        ],
+                        "json" =>
+                        [
+                            "userMail" => $this->getMessageTo($event->getMessage()->getTo()),
+                            "campagnId" => $this->campagn_id,
+                            "databaseId" => $this->database_id,
+                            "html" => $event->getMessage()->getBody()
+                        ]
                     ]
-                ]
-            );
+                );
+            }
+            // else, do nothing
         }
-        // else, do nothing
     }
 
     public function getUrl()
@@ -173,14 +192,11 @@ class SuluHubScoreFormSender implements Swift_Events_SendListener
         return $key;
     }
 
-    private function isEnLigneAndAgenda($event)
+    private function getMessageBody($body)
     {
-        // I'm looking for the string "En ligne" in the body of the message and if the url contains "/agenda/"
-        // If true, then I do nothing
-        $isEnLigne = str_contains($event->getMessage()->getBody(), 'En ligne');
-        $isAgendaEvent = str_contains($_SERVER['REQUEST_URI'], '/agenda/');
-        if ($isAgendaEvent && $isEnLigne) {
-            return;
-        }
+        $body = str_replace("\n", "", $body);
+        $body = str_replace("\r", "", $body);
+        $body = str_replace("\t", "", $body);
+        return $body;
     }
 }
